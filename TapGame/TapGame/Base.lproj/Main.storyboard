@@ -34,9 +34,10 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="x2n-Dy-PEG">
                                 <rect key="frame" x="20" y="138" width="374" height="708"/>
                                 <subviews>
-                                    <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="rectangle.and.hand.point.up.left.filled" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="THE-qM-BE0">
+                                    <imageView clipsSubviews="YES" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="rectangle.and.hand.point.up.left.filled" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="THE-qM-BE0">
                                         <rect key="frame" x="8" y="8" width="70" height="70"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <gestureRecognizers/>
                                     </imageView>
                                 </subviews>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>

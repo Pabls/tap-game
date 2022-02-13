@@ -18,7 +18,8 @@
     BOOL isGameStarted;
     
     NSTimeInterval gameTimeInterval;
-    NSTimer *timer;
+    NSTimer *gameTimer;
+    NSTimer *moveImageTimer;
     
     NSString *gameTime;
     NSString *remainingGameTime;
@@ -27,6 +28,11 @@
     NSString *startGame;
     NSString *stopGame;
     NSString *lastScore;
+    
+    UITapGestureRecognizer *recognizer;
+    
+    int maxXValue;
+    int maxYValue;
 }
 
 - (void)viewDidLoad {
@@ -52,6 +58,7 @@
     stopGame = @"Завершить";
     
     lastScore = @"Последний счет: %d";
+    recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleGesture)];
 }
 
 - (void) initUi {
@@ -63,7 +70,8 @@
     self.gameFieldView.layer.borderWidth = 1;
     self.gameFieldView.layer.cornerRadius = 12;
     self.gameFieldView.layer.borderColor = UIColor.lightGrayColor.CGColor;
-    
+    [self.image addGestureRecognizer: recognizer];
+    [self setImageVisibility: FALSE];
     [self updateUi];
 }
 
@@ -78,6 +86,12 @@
     [self setGameTimeInterval];
 }
 
+-(void) handleGesture {
+    currentScore += 1;
+    [self setScore: currentScore];
+    [self setImageVisibility: NO];
+}
+
 - (void) actionButtonTapped {
     if(isGameStarted == YES) {
         [self stopGame];
@@ -88,26 +102,26 @@
 
 - (void) startGame {
     isGameStarted = YES;
+    maxXValue = self.gameFieldView.frame.size.width - self.image.frame.size.width;
+    maxYValue = self.gameFieldView.frame.size.height - self.image.frame.size.height;
     [self updateUi];
-    if(timer != nil) {
-        [timer invalidate];
-    }
-    timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(changeUiByTimer) userInfo:nil repeats:YES];
+    [self invalidateTimers];
+    gameTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(changeUiByTimer) userInfo:nil repeats:YES];
+    moveImageTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(moveImageByTimer) userInfo:nil repeats:YES];
+    [moveImageTimer fire];
 }
 
 - (void) stopGame {
     isGameStarted = NO;
-    if(timer != nil) {
-        [timer invalidate];
-    }
+    [self invalidateTimers];
     [self updateUi];
+    [self setImageVisibility:FALSE];
 }
 
 - (void) updateUi {
     [self setGameTimeInterval];
     [self changeActionButtonTitle];
     [self setStepperEnabled: !isGameStarted];
-    [self setImageVisibility: isGameStarted];
     [self setScore: currentScore];
 }
 
@@ -118,6 +132,15 @@
         gameTimeInterval -= 1;
         [self setGameTime: gameTimeInterval];
     }
+}
+
+- (void) moveImageByTimer {
+    [self setImageVisibility: FALSE];
+    self.image.frame = CGRectMake([self getRandomNumberBetweenZero: maxXValue],
+                                  [self getRandomNumberBetweenZero: maxYValue],
+                                  self.image.frame.size.width,
+                                  self.image.frame.size.height);
+    [self setImageVisibility: TRUE];
 }
 
 #pragma mark - State
@@ -149,6 +172,22 @@
 
 - (void) setStepperEnabled: (BOOL) isEnabled {
     self.timeStepper.enabled = isEnabled;
+}
+
+- (void) invalidateTimers {
+    if(gameTimer != nil) {
+        [gameTimer invalidate];
+    }
+    
+    if(moveImageTimer != nil) {
+        [moveImageTimer invalidate];
+    }
+}
+
+#pragma mark - Utils
+
+- (int) getRandomNumberBetweenZero:(int)to {
+    return arc4random_uniform(to);
 }
 
 @end
