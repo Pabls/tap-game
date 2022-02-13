@@ -16,6 +16,7 @@
     int defaultGameTime;
     int currentScore;
     BOOL isGameStarted;
+    
     NSTimeInterval gameTimeInterval;
     NSTimer *timer;
     
@@ -41,12 +42,12 @@
     defaultGameTime = 30;
     currentScore = 0;
     isGameStarted = NO;
-    gameTimeInterval = self.timeStepper.value;
+    gameTimeInterval = 0;
     
     gameTime = @"Время";
     remainingGameTime = @"Оставшееся время";
     gameTimeFullText =  @"%@ : %d сек";
-
+    
     startGame = @"Начать";
     stopGame = @"Завершить";
     
@@ -69,14 +70,12 @@
 #pragma mark - Listeners
 
 - (void) addListeners {
-    [self.timeStepper addTarget:self action: @selector(stepperTapped) forControlEvents: UIControlEventTouchDown];
+    [self.timeStepper addTarget:self action: @selector(stepperTapped) forControlEvents: UIControlEventTouchUpInside];
     [self.actionButton addTarget:self action:@selector(actionButtonTapped) forControlEvents:UIControlEventTouchUpInside];
 }
 
 - (void) stepperTapped {
-    int stepperValue = self.timeStepper.value;
-    [self setGameTime: stepperValue];
-    gameTimeInterval = stepperValue;
+    [self setGameTimeInterval];
 }
 
 - (void) actionButtonTapped {
@@ -90,23 +89,43 @@
 - (void) startGame {
     isGameStarted = YES;
     [self updateUi];
+    if(timer != nil) {
+        [timer invalidate];
+    }
+    timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(changeUiByTimer) userInfo:nil repeats:YES];
 }
 
 - (void) stopGame {
     isGameStarted = NO;
+    if(timer != nil) {
+        [timer invalidate];
+    }
     [self updateUi];
 }
 
 - (void) updateUi {
+    [self setGameTimeInterval];
     [self changeActionButtonTitle];
-    [self setGameTime: self.timeStepper.value];
     [self setStepperEnabled: !isGameStarted];
     [self setImageVisibility: isGameStarted];
     [self setScore: currentScore];
 }
 
+- (void) changeUiByTimer {
+    if(gameTimeInterval == 0) {
+        [self stopGame];
+    } else {
+        gameTimeInterval -= 1;
+        [self setGameTime: gameTimeInterval];
+    }
+}
 
 #pragma mark - State
+
+- (void) setGameTimeInterval {
+    gameTimeInterval = self.timeStepper.value;
+    [self setGameTime: gameTimeInterval];
+}
 
 - (void) setGameTime:(int) seconds {
     NSString *text = isGameStarted? remainingGameTime : gameTime;
@@ -115,7 +134,7 @@
 }
 
 - (void) changeActionButtonTitle {
-    NSString *text = isGameStarted? startGame : stopGame;
+    NSString *text = isGameStarted? stopGame : startGame;
     [self.actionButton setTitle:text forState:UIControlStateNormal];
 }
 
